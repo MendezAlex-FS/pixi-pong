@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment: Pixie Pong</title>
+</head>
+
+<body>
+    <game id="game"></game>
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <script type="module">
+        // Create the pixi app and initialize it.
+        const app = new PIXI.Application();
+        await app.init({
+            backgroundColor: "#3398b9",
+            width: 800,
+            height: 800
+        });
+
+        // Add the canvas to the board
+        document.getElementById('game').appendChild(app.canvas);
+
+        // Create and instance to the graphics and draw the circle/ball
+        const circle = new PIXI.Graphics();
+        circle.beginFill("#f5ef42");
+        circle.drawCircle(0, 0, 10);
+        circle.endFill();
+        circle.x = 500;
+        circle.y = 400;
+        app.stage.addChild(circle);
+
+        // Set the speed of the ball
+        let xv = 1;
+        let yv = 1;
+
+        // This is the function to draw the borders
+        function drawBorder(x, y, width, height, color) {
+            const rect = new PIXI.Graphics();
+            rect.beginFill(color);
+            rect.drawRect(0, 0, width, height);
+            rect.endFill();
+            rect.x = x;
+            rect.y = y;
+            return rect;
+        }
+
+        // Set the original borders blue borders
+        app.stage.addChild(drawBorder(0, 0, 800, 10, "blue"));     // Top
+        app.stage.addChild(drawBorder(0, 790, 800, 10, "blue"));   // Bottom
+        app.stage.addChild(drawBorder(0, 0, 10, 800, "blue"));     // Left
+        app.stage.addChild(drawBorder(790, 0, 10, 800, "blue"));   // Right
+
+        // This will be used to track which border has been hit
+        const bordersHit = {
+            top: false,
+            bottom: false,
+            left: false,
+            right: false
+        };
+
+        // This is our promise chaining function
+        function bounceUntilBorderHit(borderKey, condition, draw) {
+            return new Promise((resolve) => {
+                const handler = () => {
+                    // Check if the border has not been hit
+                    if (condition() && !bordersHit[borderKey]) {
+                        // Flag the border as hit
+                        bordersHit[borderKey] = true;
+
+                        // Change the color of the border
+                        draw();
+
+                        // Kill the ticker
+                        app.ticker.remove(handler);
+
+                        // Resolve the promise
+                        resolve();
+                    }
+                };
+                app.ticker.add(handler);
+            });
+        }
+
+        function moveBall() {
+            const moveBallHandler = () => {
+                // Move the ball
+                circle.x += xv;
+                circle.y += yv;
+
+                // Change the direction of the ball
+                if (circle.y - 10 <= 0 || circle.y + 10 >= 800) yv = -yv;
+                if (circle.x - 10 <= 0 || circle.x + 10 >= 800) xv = -xv;
+            };
+
+            // Add the move ball handler and return the kill switch to the ticker
+            app.ticker.add(moveBallHandler);
+            return () => app.ticker.remove(moveBallHandler);
+        }
+
+        const stopBall = moveBall();
+
+        // With promise chaining, the order matters. Otherwise we will hit
+        // a border and it will not changed color until it hits it a second time.
+        // This would not happen if we use Promise.all(...) and start them in parallel.
+        // Or we can use one promise and do if statements.
+        bounceUntilBorderHit('right', () => circle.x + 10 >= 800, () => {
+            app.stage.addChild(drawBorder(790, 0, 10, 800, "gold"));
+        })
+            .then(() => bounceUntilBorderHit('bottom', () => circle.y + 10 >= 800, () => {
+                app.stage.addChild(drawBorder(0, 790, 800, 10, "gold"));
+            }))
+            .then(() => bounceUntilBorderHit('left', () => circle.x - 10 <= 0, () => {
+                app.stage.addChild(drawBorder(0, 0, 10, 800, "gold"));
+            }))
+            .then(() => bounceUntilBorderHit('top', () => circle.y - 10 <= 0, () => {
+                app.stage.addChild(drawBorder(0, 0, 800, 10, "gold"));
+            }))
+            .then(() => {
+                stopBall();
+                app.stage.removeChild(circle);
+
+                // Use a setTimeout so the screen can show the final border 
+                // change color before the alert.
+                setTimeout(() => {
+                    alert("All borders have been hit.");
+                }, 100);
+            });
+    </script>
+</body>
+
+</html>
