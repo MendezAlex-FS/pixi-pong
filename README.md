@@ -8,7 +8,7 @@ In order to start working on this repository, you will need to do the steps belo
 
 ### Installation
 
-_Follow the below instruction to get you started with the car finder repository._
+_Follow the below instruction to get you started with the pixi pong repository._
 
 1. Clone the repo
    ```sh
