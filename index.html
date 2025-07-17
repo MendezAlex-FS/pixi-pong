@@ -101,10 +101,11 @@
 
         const stopBall = moveBall();
 
+        // Here we are chaining promises which check if a border is hit and turns it to gold.
         // With promise chaining, the order matters. Otherwise we will hit
         // a border and it will not changed color until it hits it a second time.
         // This would not happen if we use Promise.all(...) and start them in parallel.
-        // Or we can use one promise and do if statements.
+        // Or we can use one promise and do if statements which do not require order at all.
         bounceUntilBorderHit('right', () => circle.x + 10 >= 800, () => {
             app.stage.addChild(drawBorder(790, 0, 10, 800, "gold"));
         })
