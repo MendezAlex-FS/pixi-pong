@@ -17,4 +17,4 @@ _Follow the below instruction to get you started with the pixi pong repository._
    ```sh
    git clone https://github.com/MendezAlex-FS/pixi-pong.git
    ```
-1. Right click on the index.html and choose "Open with Live Server" or "Show in Browser" if not Live Sever was not installed.
+1. Right click on the index.html and choose "Open with Live Server" or "Show in Browser" if Live Sever was not installed.
